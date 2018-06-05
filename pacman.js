@@ -13,7 +13,7 @@ var NONE        = 4,
     ghostImg    = new Image();
 
 Pacman.FPS = 30;
-ghostImg.src= "/img/AngryBirds.png";
+ghostImg.src= "img/AngryBirds.png";
 
 Pacman.Ghost = function (game, map, colour) {
 
