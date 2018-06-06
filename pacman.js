@@ -154,31 +154,6 @@ Pacman.Ghost = function (game, map, colour) {
 
         ctx.drawImage(ghostImg, colour * 140, 0, 80, 80, left-s/10, top-s/10, 22, 22);
 
-        // ctx.fillStyle = getColour();
-        // ctx.beginPath();
-        //
-        // ctx.moveTo(left, base);
-        //
-        // ctx.quadraticCurveTo(left, top, left + (s/2),  top);
-        // ctx.quadraticCurveTo(left + s, top, left+s,  base);
-        //
-        // // Wavy things at the bottom
-        // ctx.quadraticCurveTo(tl-(inc*1), base+high, tl - (inc * 2),  base);
-        // ctx.quadraticCurveTo(tl-(inc*3), base+low, tl - (inc * 4),  base);
-        // ctx.quadraticCurveTo(tl-(inc*5), base+high, tl - (inc * 6),  base);
-        // ctx.quadraticCurveTo(tl-(inc*7), base+low, tl - (inc * 8),  base);
-        // ctx.quadraticCurveTo(tl-(inc*9), base+high, tl - (inc * 10), base);
-        //
-        // ctx.closePath();
-        // ctx.fill();
-        //
-        // ctx.beginPath();
-        // ctx.fillStyle = "#FFF";
-        // ctx.arc(left + 6,top + 6, s / 6, 0, 300, false);
-        // ctx.arc((left + s) - 6,top + 6, s / 6, 0, 300, false);
-        // ctx.closePath();
-        // ctx.fill();
-
         var f = s / 12;
         var off = {};
         off[RIGHT] = [f, 0];
@@ -473,16 +448,7 @@ Pacman.User = function (game, map) {
             return;
         }
 
-        ctx.fillStyle = "#FFFF00";
-        ctx.beginPath();        
-        ctx.moveTo(((position.x/10) * size) + half, 
-                   ((position.y/10) * size) + half);
-        
-        ctx.arc(((position.x/10) * size) + half, 
-                ((position.y/10) * size) + half,
-                half, 0, Math.PI * 2 * amount, true); 
-        
-        ctx.fill();    
+        ctx.drawImage(ghostImg, 8 * 70, 0, 80, 80, (position.x/10)*size, (position.y/10)*size, 19, 21);
     };
 
     function draw(ctx) { 
@@ -490,19 +456,7 @@ Pacman.User = function (game, map) {
         var s     = map.blockSize, 
             angle = calcAngle(direction, position);
 
-        ctx.fillStyle = "#FFFF00";
-
-        ctx.beginPath();        
-
-        ctx.moveTo(((position.x/10) * s) + s / 2,
-                   ((position.y/10) * s) + s / 2);
-        
-        ctx.arc(((position.x/10) * s) + s / 2,
-                ((position.y/10) * s) + s / 2,
-                s / 2, Math.PI * angle.start, 
-                Math.PI * angle.end, angle.direction); 
-        
-        ctx.fill();    
+        ctx.drawImage(ghostImg, 8 * 70, 0, 80, 80, (position.x/10)*s, (position.y/10)*s, 19, 21);
     };
     
     initUser();
@@ -609,13 +563,14 @@ Pacman.Map = function (size) {
 		            ctx.fillRect((j * blockSize), (i * blockSize), 
                                  blockSize, blockSize);
 
-                    ctx.fillStyle = "#FFF";
-                    ctx.arc((j * blockSize) + blockSize / 2,
-                            (i * blockSize) + blockSize / 2,
-                            Math.abs(5 - (pillSize/3)), 
-                            0, 
-                            Math.PI * 2, false); 
-                    ctx.fill();
+                    drawStar(
+                        ctx,
+                        (j * blockSize) + blockSize / 2,
+                        (i * blockSize) + blockSize / 2,
+                        5,
+                        Math.abs(5 - (pillSize/3)),
+                        Math.abs(5 - (pillSize/3.2))
+                    );
                     ctx.closePath();
                 }
 		    }
@@ -657,13 +612,39 @@ Pacman.Map = function (size) {
 
             if (layout === Pacman.BISCUIT) {
                 ctx.fillStyle = "#FFF";
-		        ctx.fillRect((x * blockSize) + (blockSize / 2.5), 
-                             (y * blockSize) + (blockSize / 2.5), 
-                             blockSize / 6, blockSize / 6);
+                drawStar(ctx, (x * blockSize) + (blockSize / 2), (y * blockSize) + (blockSize / 2), 5, 0.2, 0.1);
 	        }
         }
         ctx.closePath();	 
     };
+
+    function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius){
+        var rot=Math.PI/2*3;
+        var x=cx;
+        var y=cy;
+        var step=Math.PI/spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy-outerRadius);
+        for(var np = 0; np < spikes; np++ ){
+            x = cx+Math.cos(rot)*outerRadius;
+            y = cy+Math.sin(rot)*outerRadius;
+            ctx.lineTo(x,y);
+            rot += step;
+
+            x = cx+Math.cos(rot)*innerRadius;
+            y = cy+Math.sin(rot)*innerRadius;
+            ctx.lineTo(x,y);
+            rot+=step;
+        }
+        ctx.lineTo(cx, cy-outerRadius);
+        ctx.closePath();
+        ctx.lineWidth=5;
+        ctx.strokeStyle='#FFF';
+        ctx.stroke();
+        ctx.fillStyle='#FFF';
+        ctx.fill();
+    }
 
     reset();
     
@@ -878,15 +859,7 @@ var PACMAN = (function () {
         ctx.fillStyle = "#FFFF00";
 
         for (var i = 0, len = user.getLives(); i < len; i++) {
-            ctx.fillStyle = "#FFFF00";
-            ctx.beginPath();
-            ctx.moveTo(150 + (25 * i) + map.blockSize / 2,
-                       (topLeft+1) + map.blockSize / 2);
-            
-            ctx.arc(150 + (25 * i) + map.blockSize / 2,
-                    (topLeft+1) + map.blockSize / 2,
-                    map.blockSize / 2, Math.PI * 0.25, Math.PI * 1.75, false);
-            ctx.fill();
+            ctx.drawImage(ghostImg, 8 * 70, 0, 80, 80, 150 + (25 * i) + map.blockSize / 2, (topLeft+1), 19, 21);
         }
 
         ctx.fillStyle = !soundDisabled() ? "#00FF00" : "#FF0000";
